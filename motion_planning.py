@@ -131,7 +131,6 @@ class MotionPlanning(Drone):
         self.set_home_position(lon0, lat0, 0)
 
         # TODO: retrieve current global position
-        # global_pos = (self.global_position[0], self.global_position[1], self.global_position[2])
         global_position = [self._longitude, self._latitude, self._altitude]
         print(global_position)
         # TODO: convert to current local position using global_to_local()
@@ -204,4 +203,3 @@ if __name__ == "__main__":
     time.sleep(1)
 
     drone.start()
-    

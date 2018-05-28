@@ -27,51 +27,42 @@ You're reading it! Below I describe how I addressed each rubric point and where 
 ### Explain the Starter Code
 
 #### 1. Explain the functionality of what's provided in `motion_planning.py` and `planning_utils.py`
-These scripts contain a basic planning implementation that includes...
+The most significant difference between backyard_flyer_solution.py and the modified version called motion_planning.py is the addition of the Planning state and plan_path at line 114. When the drone is at the arming state the state_callback method transitions to the planning state, and the method plan_path is then executed. This methods responsibility is to plan the necessary waypoints for the drone to reach its predefined target location.
 
-And here's a lovely image of my results (ok this image has nothing to do with it, but it's a nice example of how to include images in your writeup!)
-![Top Down View](./misc/high_up.png)
+The plan_path method consists of;
 
-Here's | A | Snappy | Table
---- | --- | --- | ---
-1 | `highlight` | **bold** | 7.41
-2 | a | b | c
-3 | *italic* | text | 403
-4 | 2 | 3 | abcd
+Defines the initial values of the target altitude at line 117 and safety distance at line 118. Both values were initially set to 5, and the target altitude is stored the target_position[2] Numpy array at line 120.
+
+The obstacle map 'colliders.csv' is loaded at line 133.
+
+The grid is calculated at line 136 using the method create_grid from the module planning_utils.py.
+
+The goal grid is offset 10 north and 10 east from the local position on line 143.
+
+The A* search algorithm executed on line 151 using the a_star method from the module planning_utils.py is used to find the path to the goal
+
+The waypoints are generated at line 155, and they are sent to the simulator using the method send_waypoints at line 157.
+
 
 ### Implementing Your Path Planning Algorithm
 
 #### 1. Set your global home position
-Here students should read the first line of the csv file, extract lat0 and lon0 as floating point values and use the self.set_home_position() method to set global home. Explain briefly how you accomplished this in your code.
-
-
-And here is a lovely picture of our downtown San Francisco environment from above!
-![Map of SF](./misc/map.png)
+At line 125 the colliders.csv file is opened, and the first row is read to extract the Latitude and Longitude using readline() and converted to floating point values. At line 131 these values are used to set the home position with set_home_position.
 
 #### 2. Set your current local position
-Here as long as you successfully determine your local position relative to global home you'll be all set. Explain briefly how you accomplished this in your code.
-
-
-Meanwhile, here's a picture of me flying through the trees!
-![Forest Flying](./misc/in_the_trees.png)
-
+At line 134 global_position = [self._longitude, self._latitude, self._altitude] retrives the current global postion  and at line 137 current_local_position = global_to_local(global_position, self.global_home) determines the current local position.
 #### 3. Set grid start position from local position
-This is another step in adding flexibility to the start location. As long as it works you're good to go!
-
+At Line 151 grid_start = (int(current_local_position[0] - north_offset), int(current_local_position[1] - east_offset)) the north_offset and east_offset are the center of the grid. This center point is subtracted from the the current local position in the map reference frame to get the start position in the grid reference frame instead of the map center.
 #### 4. Set grid goal position from geodetic coords
-This step is to add flexibility to the desired goal location. Should be able to choose any (lat, lon) within the map and have it rendered to a goal location on the grid.
+The goal location is set on the grid from the command line arguments (--target_lat, --target_lon, --target_alt) at lines 195 - 197 and line 200
 
 #### 5. Modify A* to include diagonal motion (or replace A* altogether)
-Minimal requirement here is to modify the code in planning_utils() to update the A* implementation to include diagonal motions on the grid that have a cost of sqrt(2), but more creative solutions are welcome. Explain the code you used to accomplish this step.
-
+The diagonal motions on the grid method of A* is achieved by adding the Actions NE, NW, SE, and SW with a cost of sqrt(2) at lines 59-62 in planning_utils.py. Valid_actions() was also modified to remove NE, NW, SE, or SW when it would move off the grid, or collide at lines 92-99 also in planning_utils.py.
 #### 6. Cull waypoints 
-For this step you can use a collinearity test or ray tracing method like Bresenham. The idea is simply to prune your path of unnecessary waypoints. Explain the code you used to accomplish this step.
-
-
-
+The calculated path is pruned with a collinearity function to eliminate unnecessary waypoints at lines 159-180 in planning_utils.py and is derived from the code presented in lectures
 ### Execute the flight
 #### 1. Does it work?
-It works!
+It works! But sometimes the drone goes too fast and slightly misses the waypoints. 
 
 ### Double check that you've met specifications for each of the [rubric](https://review.udacity.com/#!/rubrics/1534/view) points.
   
